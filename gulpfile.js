@@ -1,6 +1,8 @@
 const gulp = require('gulp');
-
 const rollup = require('rollup');
+const htmlmin = require('gulp-htmlmin');
+const newer = require('gulp-newer');
+const eslint = require('gulp-eslint');
 
 const rollupPlugins = {
 	commonjs: require('@rollup/plugin-commonjs'),
@@ -20,6 +22,7 @@ gulp.task('rollup--worker', async () => {
                 tsconfig: './tsconfig.workers.json',
                 outDir: './dist/',
             }),
+			rollupPlugins.minifyHtml(),
         ],
     });
 
@@ -49,7 +52,38 @@ gulp.task('rollup--init', async () => {
     });
 });
 
+gulp.task('eslint', () => {
+	return gulp.src(
+		'./src/**/*.ts'
+	).pipe(
+		eslint({
+			configFile: './.eslint.js',
+		})
+	).pipe(
+		eslint.format()
+	).pipe(
+		eslint.failAfterError()
+	);
+});
+
+gulp.task('html', () => {
+	return gulp.src('./src/**/*.html').pipe(
+		newer('./dist/')
+	).pipe(htmlmin({
+		collapseBooleanAttributes: true,
+		collapseInlineTagWhitespace: false,
+		collapseWhitespace: true,
+		decodeEntities: true,
+		sortAttributes: true,
+		maxLineLength: 79,
+	})).pipe(gulp.dest(
+		'./dist/'
+	));
+});
+
 gulp.task('default', gulp.series(...[
+    'eslint',
+    'html',
     gulp.parallel(...[
         'rollup--init',
         'rollup--worker',
