@@ -12,6 +12,7 @@ import {
 } from 'three';
 
 declare type marker = [number, number, number, string];
+declare type moon = [number];
 
 const camera = new PerspectiveCamera(
 	75,
@@ -39,13 +40,18 @@ const rings = new Mesh(
 );
 
 const speed = {
-	camera: 0.001,
+	camera: 0.0001,
 	light: -0.00001,
+	moon: -0.001,
 };
 
 const markers: marker[] = [];
 const markerIds: number[] = [];
 const markerMeshes: WeakMap<marker, Object3D> = new WeakMap();
+
+const moons: moon[] = [];
+const moonIds: number[] = [];
+const moonMeshes: WeakMap<moon, Object3D> = new WeakMap();
 
 let renderer: WebGLRenderer|undefined;
 let canvas: OffscreenCanvas|undefined;
@@ -104,9 +110,9 @@ function placeMarkerInThreeDimensions(marker: marker): void
 		throw new Error('marker does not have a mesh!');
 	}
 
-	object.position.x = Math.sin(phi) * Math.cos(theta);
-	object.position.y = Math.sin(phi) * Math.sin(theta);
-	object.position.z = Math.cos(phi);
+	object.position.x = 1.02 * Math.sin(phi) * Math.cos(theta);
+	object.position.y = 1.02 * Math.sin(phi) * Math.sin(theta);
+	object.position.z = 1.02 * Math.cos(phi);
 }
 
 function render(): void {
@@ -116,6 +122,14 @@ function render(): void {
 		rotateThingAroundPlanet(camera, speed.camera, diff);
 		rotateThingAroundPlanet(light, speed.light, diff);
 		rotateThingAroundPlanet(lightOpposite, speed.light, diff);
+
+		moons.forEach(moon => {
+			rotateThingAroundPlanet(
+				moonMeshes.get(moon) as Object3D,
+				speed.moon,
+				diff
+			);
+		});
 
 		renderer.render(scene, camera);
 	}
@@ -129,7 +143,7 @@ function addMarker(marker: marker): void
 	markerIds[markers.push(marker) - 1] = marker[0];
 
 	const markerMesh = new Mesh(
-		new SphereGeometry(0.1, 3, 2),
+		new SphereGeometry(0.02, 3, 2),
 		new MeshPhongMaterial({
 			color: 0xffffff,
 		})
@@ -138,6 +152,24 @@ function addMarker(marker: marker): void
 	markerMeshes.set(marker, markerMesh);
 	placeMarkerInThreeDimensions(marker);
 	scene.add(markerMesh);
+}
+
+function addMoon(moon: moon): void
+{
+	moonIds[moons.push(moon) - 1] = moon[0];
+
+	const moonMesh = new Mesh(
+		new SphereGeometry(0.125),
+		new MeshPhongMaterial({
+			color:0xffffff,
+			flatShading: true
+		})
+	);
+
+	moonMesh.position.x = 1.75;
+
+	planet.add(moonMesh);
+	moonMeshes.set(moon, moonMesh);
 }
 
 self.onmessage = (e: MessageEvent) => {
@@ -215,6 +247,15 @@ self.onmessage = (e: MessageEvent) => {
 			scene.add(rings);
 		} else {
 			scene.remove(rings);
+		}
+	} else if (
+		'addMoon' in e.data &&
+		e.data.addMoon instanceof Array &&
+		1 === e.data.addMoon.length &&
+		Number.isSafeInteger(e.data.addMoon[0])
+	) {
+		if ( ! moonIds.includes(e.data.addMoon[0])) {
+			addMoon(e.data.addMoon);
 		}
 	} else {
 		console.error(e);

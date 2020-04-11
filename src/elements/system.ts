@@ -5,6 +5,7 @@ import {
 	TemplateResult
 } from 'lit-element';
 import { Planet } from './planet';
+import { Moon } from './moon';
 
 @customElement('nmsh-system')
 export class System extends LitElement
@@ -26,5 +27,17 @@ export class System extends LitElement
 				return e instanceof Planet;
 			}
 		) as Planet[]);
+	}
+
+	get moons(): Moon[]
+	{
+		return this.planets.reduce(
+			(accumulator, planet): Moon[] => {
+				accumulator.push(...planet.moons);
+
+				return accumulator;
+			},
+			[] as Moon[]
+		);
 	}
 }

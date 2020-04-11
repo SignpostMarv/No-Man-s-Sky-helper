@@ -8,6 +8,7 @@ import {
 import {
 	Marker,
 } from './marker';
+import { Moon } from './moon';
 
 const surfaces: WeakMap<Planet, HTMLCanvasElement> = new WeakMap();
 const renderers: WeakMap<Planet, Worker> = new WeakMap();
@@ -15,6 +16,24 @@ const renderers: WeakMap<Planet, Worker> = new WeakMap();
 @customElement('nmsh-planet')
 export class Planet extends LitElement
 {
+
+	get canvas(): HTMLCanvasElement
+	{
+		return surfaces.get(this) as HTMLCanvasElement;
+	}
+
+	get renderer(): Worker
+	{
+		return renderers.get(this) as Worker;
+	}
+
+	get moons(): Moon[]
+	{
+		return [...this.querySelectorAll('nmsh-moon')].filter(
+			e => e instanceof Moon
+		) as Moon[];
+	}
+
 	constructor()
 	{
 		super();
@@ -38,16 +57,6 @@ export class Planet extends LitElement
 
 	@property({type: Boolean})
 	rings = false;
-
-	get canvas(): HTMLCanvasElement
-	{
-		return surfaces.get(this) as HTMLCanvasElement;
-	}
-
-	get renderer(): Worker
-	{
-		return renderers.get(this) as Worker;
-	}
 
 	resize(): void
 	{
@@ -85,9 +94,18 @@ export class Planet extends LitElement
 			});
 		});
 
+		([...this.querySelectorAll('nmsh-moon')].filter(
+			e => e instanceof Moon
+		) as Moon[]).forEach((_e, i) => {
+			return this.renderer.postMessage({
+				addMoon: [
+					i,
+				],
+			});
+		});
+
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
-
 				this.resize();
 			});
 		});
