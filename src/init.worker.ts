@@ -4,9 +4,11 @@ import {
     Scene,
     DirectionalLight,
     SphereGeometry,
-    MeshPhongMaterial,
+	MeshPhongMaterial,
     Mesh,
     Object3D,
+	TorusGeometry,
+	PointLight,
 } from 'three';
 
 declare type marker = [number, number, number, string];
@@ -19,18 +21,25 @@ const camera = new PerspectiveCamera(
 );
 
 const scene = new Scene();
-const light = new DirectionalLight(0xffffff, 1);
+const light = new PointLight(0xffffff, 1);
 const lightOpposite = new DirectionalLight(0xffffff, 0.1);
 const planet = new Mesh(
     new SphereGeometry(1, 32, 32),
     new MeshPhongMaterial({
         color: 0xff0000,
-        flatShading: true,
+		flatShading: true,
     })
+);
+const rings = new Mesh(
+	new TorusGeometry(1.375, 0.125, 2, 32),
+	new MeshPhongMaterial({
+		color: 0xffffff,
+        flatShading: true,
+	})
 );
 
 const speed = {
-    camera: 0.0001,
+    camera: 0.001,
     light: -0.00001,
 };
 
@@ -50,6 +59,15 @@ camera.updateProjectionMatrix();
 
 light.position.set(-1, 2, 4);
 lightOpposite.position.set(1, -2, -4);
+
+light.position.multiplyScalar(10);
+
+rings.rotation.x = 90 * (Math.PI / 180);
+rings.rotation.y = rings.rotation.z = 10 * (Math.PI / 180);
+
+light.castShadow = true;
+planet.receiveShadow = planet.castShadow = true;
+rings.receiveShadow = rings.castShadow = true;
 
 scene.add(light);
 scene.add(lightOpposite);
@@ -106,11 +124,29 @@ function render(): void {
     now += diff;
 }
 
+function addMarker(marker: marker): void
+{
+	markerIds[markers.push(marker) - 1] = marker[0];
+
+	const markerMesh = new Mesh(
+		new SphereGeometry(0.1, 3, 2),
+		new MeshPhongMaterial({
+			color: 0xffffff,
+		})
+	);
+
+	markerMeshes.set(marker, markerMesh);
+	placeMarkerInThreeDimensions(marker);
+	scene.add(markerMesh);
+}
+
 self.onmessage = (e: MessageEvent) => {
     if ('offscreen' in e.data) {
         if ( ! (e.data.offscreen instanceof OffscreenCanvas)) {
             throw new Error('offscreen canvas was not supplied as expected!');
-        }
+		}
+
+		console.log('offscreen canvas handed over');
 
         canvas = e.data.offscreen;
         renderer = new WebGLRenderer({
@@ -148,18 +184,7 @@ self.onmessage = (e: MessageEvent) => {
         'string' === typeof e.data.addMarker[3] &&
         ! markerIds.includes(e.data.addMarker[0])
     ) {
-        markerIds[markers.push(e.data.addMarker) - 1] = e.data.addMarker[0];
-
-        const markerMesh = new Mesh(
-            new SphereGeometry(0.1, 3, 2),
-            new MeshPhongMaterial({
-                color: 0xffffff,
-            })
-        );
-
-        markerMeshes.set(e.data.addMarker, markerMesh);
-        placeMarkerInThreeDimensions(e.data.addMarker);
-        scene.add(markerMesh);
+		addMarker(e.data.addMarker);
     } else if (
         'updateMarker' in e.data &&
         e.data.updateMarker instanceof Array &&
@@ -167,9 +192,11 @@ self.onmessage = (e: MessageEvent) => {
         Number.isSafeInteger(e.data.updateMarker[0]) &&
         Number.isFinite(e.data.updateMarker[1]) &&
         Number.isFinite(e.data.updateMarker[2]) &&
-        'string' === typeof e.data.updateMarker[3] &&
-        markerIds.includes(e.data.updateMarker[0])
+        'string' === typeof e.data.updateMarker[3]
     ) {
+		if ( ! markerIds.includes(e.data.updateMarker[0])) {
+			addMarker(e.data.updateMarker);
+		} else {
         const marker = markers[
             markerIds.indexOf(e.data.updateMarker[0])
         ] as marker;
@@ -178,7 +205,17 @@ self.onmessage = (e: MessageEvent) => {
         marker[2] = e.data.updateMarker[2];
         marker[3] = e.data.updateMarker[3];
 
-        placeMarkerInThreeDimensions(marker);
+		placeMarkerInThreeDimensions(marker);
+		}
+	} else if (
+		'hasRings' in e.data &&
+		'boolean' === typeof e.data.hasRings
+	) {
+		if (e.data.hasRings) {
+			scene.add(rings);
+		} else {
+			scene.remove(rings);
+		}
     } else {
         console.error(e);
 
