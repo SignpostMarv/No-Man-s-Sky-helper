@@ -16,12 +16,12 @@ const offscreen = canvas.transferControlToOffscreen();
 worker.postMessage({offscreen}, [offscreen]);
 
 function resize(): void {
-    worker.postMessage({
-        resize: [
-            canvas.clientWidth,
-            canvas.clientHeight,
-        ],
-    });
+	worker.postMessage({
+		resize: [
+			canvas.clientWidth,
+			canvas.clientHeight,
+		],
+	});
 }
 
 onresize = resize;
@@ -29,26 +29,26 @@ onresize = resize;
 resize();
 
 worker.postMessage({
-    addMarker: [0, 90, 0, 'north pole'],
+	addMarker: [0, 90, 0, 'north pole'],
 });
 worker.postMessage({
-    addMarker: [1, -90, 0, 'south pole'],
+	addMarker: [1, -90, 0, 'south pole'],
 });
 worker.postMessage({
-    addMarker: [2, -90, 0, 'random'],
+	addMarker: [2, -90, 0, 'random'],
 });
 
 function render(): void {
-    worker.postMessage({
-        updateMarker: [
-            2,
-            -90 + (180 * Math.random()),
-            0,
-            'random'
-        ],
-    });
+	worker.postMessage({
+		updateMarker: [
+			2,
+			-90 + (180 * Math.random()),
+			0,
+			'random'
+		],
+	});
 
-    requestAnimationFrame(render);
+	requestAnimationFrame(render);
 };
 
 render();

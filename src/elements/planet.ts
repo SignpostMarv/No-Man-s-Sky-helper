@@ -1,12 +1,12 @@
 import {
-    LitElement,
-    html,
-    customElement,
-    TemplateResult,
+	LitElement,
+	html,
+	customElement,
+	TemplateResult,
 	property
 } from 'lit-element';
 import {
-    Marker,
+	Marker,
 } from './marker';
 
 const surfaces: WeakMap<Planet, HTMLCanvasElement> = new WeakMap();
@@ -19,17 +19,17 @@ export class Planet extends LitElement
 	{
 		super();
 
-        surfaces.set(this, document.createElement('canvas'));
+		surfaces.set(this, document.createElement('canvas'));
 		renderers.set(this, new Worker('../init.worker.js'));
 
 		const offscreen = this.canvas.transferControlToOffscreen();
 
 		this.renderer.postMessage({offscreen}, [offscreen]);
 
-        this.canvas.setAttribute(
-            'style',
-            'display:block;width:100%;height:100%;'
-        );
+		this.canvas.setAttribute(
+			'style',
+			'display:block;width:100%;height:100%;'
+		);
 
 		addEventListener('resize', () => {
 			this.resize();
@@ -39,35 +39,35 @@ export class Planet extends LitElement
 	@property({type: Boolean})
 	rings = false;
 
-    get canvas(): HTMLCanvasElement
-    {
-        return surfaces.get(this) as HTMLCanvasElement;
-    }
+	get canvas(): HTMLCanvasElement
+	{
+		return surfaces.get(this) as HTMLCanvasElement;
+	}
 
-    get renderer(): Worker
-    {
-        return renderers.get(this) as Worker;
-    }
+	get renderer(): Worker
+	{
+		return renderers.get(this) as Worker;
+	}
 
-    resize(): void
-    {
-        const canvas = this.canvas;
+	resize(): void
+	{
+		const canvas = this.canvas;
 
-        this.renderer.postMessage({
-            resize: [
-                canvas.clientWidth,
-                canvas.clientHeight,
-            ],
-        });
-    }
+		this.renderer.postMessage({
+			resize: [
+				canvas.clientWidth,
+				canvas.clientHeight,
+			],
+		});
+	}
 
-    render(): TemplateResult
-    {
-        return html`${this.canvas}`;
-    }
+	render(): TemplateResult
+	{
+		return html`${this.canvas}`;
+	}
 
-    connectedCallback(): void
-    {
+	connectedCallback(): void
+	{
 		super.connectedCallback();
 
 		([...this.querySelectorAll('nmsh-marker')].filter(
@@ -88,7 +88,7 @@ export class Planet extends LitElement
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
 
-                this.resize();
+				this.resize();
 			});
 		});
 	}

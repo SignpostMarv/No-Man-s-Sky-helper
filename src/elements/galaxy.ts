@@ -1,8 +1,8 @@
 import {
-    LitElement,
-    html,
-    customElement,
-    TemplateResult
+	LitElement,
+	html,
+	customElement,
+	TemplateResult
 } from 'lit-element';
 import { Planet } from './planet';
 import { System } from './system';
