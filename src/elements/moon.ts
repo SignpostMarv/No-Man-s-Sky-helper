@@ -1,12 +1,11 @@
 import {
-	LitElement,
 	customElement,
-	property
 } from 'lit-element';
+import {
+	Thing,
+} from './thing';
 
 @customElement('nmsh-moon')
-export class Moon extends LitElement
+export class Moon extends Thing
 {
-	@property({type: String})
-	title = '';
 }

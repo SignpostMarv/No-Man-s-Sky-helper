@@ -1,14 +1,15 @@
 import {
-	LitElement,
 	html,
 	customElement,
 	TemplateResult
 } from 'lit-element';
 import { Planet } from './planet';
 import { System } from './system';
+import { Moon } from './moon';
+import { Thing } from './thing';
 
 @customElement('nmsh-galaxy')
-export class Galaxy extends LitElement
+export class Galaxy extends Thing
 {
 	render(): TemplateResult
 	{

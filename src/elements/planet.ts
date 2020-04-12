@@ -1,5 +1,4 @@
 import {
-	LitElement,
 	html,
 	customElement,
 	TemplateResult,
@@ -9,14 +8,19 @@ import {
 	Marker,
 } from './marker';
 import { Moon } from './moon';
+import { Thing } from './thing';
 
 const surfaces: WeakMap<Planet, HTMLCanvasElement> = new WeakMap();
 const renderers: WeakMap<Planet, Worker> = new WeakMap();
 
-@customElement('nmsh-planet')
-export class Planet extends LitElement
-{
+const markerElements = [
+	'nmsh-marker',
+	'nmsh-drop-pod',
+];
 
+@customElement('nmsh-planet')
+export class Planet extends Thing
+{
 	get canvas(): HTMLCanvasElement
 	{
 		return surfaces.get(this) as HTMLCanvasElement;
@@ -79,7 +83,7 @@ export class Planet extends LitElement
 	{
 		super.connectedCallback();
 
-		([...this.querySelectorAll('nmsh-marker')].filter(
+		([...this.querySelectorAll(markerElements.join(', '))].filter(
 			e => {
 				return e instanceof Marker;
 			}
