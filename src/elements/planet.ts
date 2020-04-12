@@ -30,6 +30,14 @@ export abstract class RenderableBody extends Thing
 		return renderers.get(this) as Worker;
 	}
 
+	focusOn(thing: Marker, distance = 1.03)
+	{
+		this.cameraAuto = false;
+		this.cameraDistance = distance;
+		this.cameraLat = thing.lat;
+		this.cameraLng = thing.lng;
+	}
+
 	constructor()
 	{
 		super();
