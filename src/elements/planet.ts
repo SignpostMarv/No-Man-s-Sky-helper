@@ -57,6 +57,18 @@ export abstract class RenderableBody extends Thing
 	@property({type: String})
 	color = 'ff0000';
 
+	@property({type: Boolean, attribute: 'camera-auto'})
+	cameraAuto = false;
+
+	@property({type: Number, attribute: 'camera-lat'})
+	cameraLat = 0;
+
+	@property({type: Number, attribute: 'camera-lng'})
+	cameraLng = 0;
+
+	@property({type: Number, attribute: 'camera-distance'})
+	cameraDistance = 4;
+
 	resize(): void
 	{
 		const canvas = this.canvas;
@@ -100,7 +112,7 @@ export abstract class RenderableBody extends Thing
 		});
 	}
 
-	update(changedProperties: Map<string, string|number>): void
+	update(changedProperties: Map<string, string|number|boolean>): void
 	{
 		super.update(changedProperties);
 
@@ -108,6 +120,37 @@ export abstract class RenderableBody extends Thing
 			const changeColor = this.color;
 
 			this.renderer.postMessage({changeColor});
+		}
+
+		if (
+			changedProperties.has('cameraAuto')
+		) {
+			const {cameraAuto} = this;
+
+			this.renderer.postMessage({cameraAuto});
+		}
+
+		if (
+			changedProperties.has('cameraLat') ||
+			changedProperties.has('cameraLng')
+		) {
+			const {
+				cameraLat,
+				cameraLng,
+			} = this;
+
+			this.renderer.postMessage({
+				cameraLat,
+				cameraLng,
+			});
+		}
+
+		if (
+			changedProperties.has('cameraDistance')
+		) {
+			const {cameraDistance} = this;
+
+			this.renderer.postMessage({cameraDistance});
 		}
 	}
 }
@@ -135,7 +178,7 @@ export class Planet extends RenderableBody
 		});
 	}
 
-	update(changedProperties: Map<string, any>): void
+	update(changedProperties: Map<string, string|number|boolean>): void
 	{
 		super.update(changedProperties);
 

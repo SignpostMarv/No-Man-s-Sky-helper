@@ -9,6 +9,7 @@ import {
 	Object3D,
 	TorusGeometry,
 	PointLight,
+	Camera,
 } from 'three';
 
 declare type marker = [number, number, number, string];
@@ -58,26 +59,9 @@ let canvas: OffscreenCanvas|undefined;
 let width = 640, height = 480;
 let cancelRender = 0;
 let now = performance.now();
-
-camera.position.z = 4;
-camera.aspect = width / height;
-camera.updateProjectionMatrix();
-
-light.position.set(-1, 2, 4);
-lightOpposite.position.set(1, -2, -4);
-
-light.position.multiplyScalar(10);
-
-rings.rotation.x = 90 * (Math.PI / 180);
-rings.rotation.y = rings.rotation.z = 10 * (Math.PI / 180);
-
-light.castShadow = true;
-planet.receiveShadow = planet.castShadow = true;
-rings.receiveShadow = rings.castShadow = true;
-
-scene.add(light);
-scene.add(lightOpposite);
-scene.add(planet);
+let cameraAuto = true;
+let cameraLat = 0, cameraLng = 0;
+let cameraDistance = 4;
 
 function rotateThingAroundPlanet(
 	thing: Object3D,
@@ -99,27 +83,50 @@ function rotateThingAroundPlanet(
 	thing.lookAt(planet.position);
 }
 
+function placeThingInThreeDimensions(
+	object: Object3D,
+	lat: number,
+	lng: number,
+	distance: number
+): void {
+	const pi = Math.PI / 180;
+	const phi = (90 - lat) * pi;
+	const theta = (180 + lng) * pi;
+
+	object.position.x = distance * Math.sin(phi) * Math.cos(theta);
+	object.position.y = distance * Math.sin(phi) * Math.sin(theta);
+	object.position.z = distance * Math.cos(phi);
+}
+
 function placeMarkerInThreeDimensions(marker: marker): void
 {
-	const pi = Math.PI / 180;
-	const phi = (90 - marker[0]) * pi;
-	const theta = (180 + marker[1]) * pi;
 	const object = markerMeshes.get(marker);
 
 	if ( ! object) {
 		throw new Error('marker does not have a mesh!');
 	}
 
-	object.position.x = 1.02 * Math.sin(phi) * Math.cos(theta);
-	object.position.y = 1.02 * Math.sin(phi) * Math.sin(theta);
-	object.position.z = 1.02 * Math.cos(phi);
+	placeThingInThreeDimensions(object, marker[1], marker[2], 1.02);
+}
+
+function placeCameraInThreeDimensions(
+	camera: Camera,
+	lat: number,
+	lng: number,
+	distance = cameraDistance
+): void {
+	placeThingInThreeDimensions(camera, lat, lng, distance);
+
+	camera.lookAt(planet.position);
 }
 
 function render(): void {
 	const diff = performance.now() - now;
 
 	if (renderer) {
+		if (cameraAuto) {
 		rotateThingAroundPlanet(camera, speed.camera, diff);
+		}
 		rotateThingAroundPlanet(light, speed.light, diff);
 		rotateThingAroundPlanet(lightOpposite, speed.light, diff);
 
@@ -172,7 +179,28 @@ function addSatellite(satellite: satellite): void
 	satelliteMeshes.set(satellite, satelliteMesh);
 }
 
-self.onmessage = (e: MessageEvent) => {
+camera.aspect = width / height;
+camera.updateProjectionMatrix();
+
+light.position.set(-1, 2, 4);
+lightOpposite.position.set(1, -2, -4);
+
+light.position.multiplyScalar(10);
+
+rings.rotation.x = 90 * (Math.PI / 180);
+rings.rotation.y = rings.rotation.z = 10 * (Math.PI / 180);
+
+light.castShadow = true;
+planet.receiveShadow = planet.castShadow = true;
+rings.receiveShadow = rings.castShadow = true;
+
+scene.add(light);
+scene.add(lightOpposite);
+scene.add(planet);
+
+placeCameraInThreeDimensions(camera, 0, 0);
+
+self.onmessage = (e: MessageEvent): void => {
 	if ('offscreen' in e.data) {
 		if ( ! (e.data.offscreen instanceof OffscreenCanvas)) {
 			throw new Error('offscreen canvas was not supplied as expected!');
@@ -265,6 +293,36 @@ self.onmessage = (e: MessageEvent) => {
 		(
 			planet.material as MeshPhongMaterial
 		).color.setHex(parseInt(e.data.changeColor, 16));
+	} else if (
+		'cameraAuto' in e.data &&
+		'boolean' === typeof e.data.cameraAuto
+	) {
+		cameraAuto = e.data.cameraAuto;
+
+		if (e.data.cameraAuto) {
+			placeCameraInThreeDimensions(camera, 0, 0, 4);
+		} else {
+			placeCameraInThreeDimensions(camera, cameraLat, cameraLng);
+		}
+	} else if (
+		'cameraLat' in e.data &&
+		'cameraLng' in e.data &&
+		Number.isFinite(e.data.cameraLat) &&
+		Number.isFinite(e.data.cameraLng)
+	) {
+		cameraLat = e.data.cameraLat;
+		cameraLng = e.data.cameraLng;
+
+		placeCameraInThreeDimensions(camera, cameraLat, cameraLng);
+	} else if (
+		'cameraDistance' in e.data &&
+		Number.isFinite(e.data.cameraDistance)
+	) {
+		cameraDistance = e.data.cameraDistance;
+
+		if ( ! cameraAuto) {
+			placeCameraInThreeDimensions(camera, cameraLat, cameraLng);
+		}
 	} else {
 		console.error(e);
 
