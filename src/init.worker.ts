@@ -125,7 +125,7 @@ function render(): void {
 
 	if (renderer) {
 		if (cameraAuto) {
-		rotateThingAroundPlanet(camera, speed.camera, diff);
+			rotateThingAroundPlanet(camera, speed.camera, diff);
 		}
 		rotateThingAroundPlanet(light, speed.light, diff);
 		rotateThingAroundPlanet(lightOpposite, speed.light, diff);
