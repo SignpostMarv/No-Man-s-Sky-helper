@@ -10,7 +10,14 @@ import {
 	TorusGeometry,
 	PointLight,
 	Camera,
+	Vector3,
+	Color,
+	Points,
+	BufferGeometry,
+	PointsMaterial,
+	Float32BufferAttribute,
 } from 'three';
+import { marker } from 'lit-html/lib/template';
 
 declare type marker = [number, number, number, string];
 declare type satellite = [number];
@@ -18,8 +25,8 @@ declare type satellite = [number];
 const camera = new PerspectiveCamera(
 	75,
 	2,
-	0.1,
-	100,
+	0.001,
+	10,
 );
 
 const scene = new Scene();
@@ -39,6 +46,10 @@ const rings = new Mesh(
 		flatShading: true,
 	})
 );
+const markerPoints = new Points(new BufferGeometry(), new PointsMaterial({
+	size: 0.01,
+	vertexColors: true,
+}));
 
 const speed = {
 	camera: 0.0001,
@@ -48,7 +59,8 @@ const speed = {
 
 const markers: marker[] = [];
 const markerIds: number[] = [];
-const markerMeshes: WeakMap<marker, Object3D> = new WeakMap();
+const markerPositions: WeakMap<marker, Vector3> = new WeakMap();
+const markerColors: WeakMap<marker, Color> = new WeakMap();
 
 const satellites: satellite[] = [];
 const satelliteIds: number[] = [];
@@ -83,8 +95,8 @@ function rotateThingAroundPlanet(
 	thing.lookAt(planet.position);
 }
 
-function placeThingInThreeDimensions(
-	object: Object3D,
+function movePositionInThreeDimensions(
+	position: Vector3,
 	lat: number,
 	lng: number,
 	distance: number
@@ -93,20 +105,29 @@ function placeThingInThreeDimensions(
 	const phi = (90 - lat) * pi;
 	const theta = (180 + lng) * pi;
 
-	object.position.x = distance * Math.sin(phi) * Math.cos(theta);
-	object.position.y = distance * Math.sin(phi) * Math.sin(theta);
-	object.position.z = distance * Math.cos(phi);
+	position.x = distance * Math.sin(phi) * Math.cos(theta);
+	position.y = distance * Math.sin(phi) * Math.sin(theta);
+	position.z = distance * Math.cos(phi);
+}
+
+function placeThingInThreeDimensions(
+	object: Object3D,
+	lat: number,
+	lng: number,
+	distance: number
+): void {
+	movePositionInThreeDimensions(object.position, lat, lng, distance);
 }
 
 function placeMarkerInThreeDimensions(marker: marker): void
 {
-	const object = markerMeshes.get(marker);
+	const position = markerPositions.get(marker);
 
-	if ( ! object) {
-		throw new Error('marker does not have a mesh!');
+	if ( ! position) {
+		throw new Error('marker does not have a position!');
 	}
 
-	placeThingInThreeDimensions(object, marker[1], marker[2], 1.02);
+	movePositionInThreeDimensions(position, marker[1], marker[2], 1.02);
 }
 
 function placeCameraInThreeDimensions(
@@ -149,16 +170,50 @@ function addMarker(marker: marker): void
 {
 	markerIds[markers.push(marker) - 1] = marker[0];
 
-	const markerMesh = new Mesh(
-		new SphereGeometry(0.02, 3, 2),
-		new MeshPhongMaterial({
-			color: 0xffffff,
-		})
+	const position = new Vector3();
+
+	markerPositions.set(marker, position);
+	markerColors.set(marker, new Color(0xffffff));
+
+	placeMarkerInThreeDimensions(marker);
+}
+
+function rebuildPointsData(): void {
+	const markersToUse = markers.filter(e => undefined !== e);
+	const positions = new Float32Array(markersToUse.length * 3);
+	const colors = new Float32Array(markersToUse.length * 3);
+	const geometry = (markerPoints.geometry as BufferGeometry);
+
+	markersToUse.forEach((marker, i) => {
+		const position = markerPositions.get(marker);
+		const color = markerColors.get(marker);
+		const offset = i * 3;
+
+		if ( ! position) {
+			throw new Error('cannot rebuild points, marker has no position!');
+		} else if ( ! color) {
+			throw new Error('cannot rebuild points, marker has no color!');
+		}
+
+		positions[offset + 0] = position.x;
+		positions[offset + 1] = position.y;
+		positions[offset + 2] = position.z;
+
+		colors[offset + 0] = color.r;
+		colors[offset + 1] = color.g;
+		colors[offset + 2] = color.b;
+	});
+
+	geometry.setAttribute(
+		'position',
+		new Float32BufferAttribute(positions, 3)
+	);
+	geometry.setAttribute(
+		'color',
+		new Float32BufferAttribute(colors, 3)
 	);
 
-	markerMeshes.set(marker, markerMesh);
-	placeMarkerInThreeDimensions(marker);
-	scene.add(markerMesh);
+	geometry.computeBoundingSphere();
 }
 
 function addSatellite(satellite: satellite): void
@@ -197,6 +252,7 @@ rings.receiveShadow = rings.castShadow = true;
 scene.add(light);
 scene.add(lightOpposite);
 scene.add(planet);
+scene.add(markerPoints);
 
 placeCameraInThreeDimensions(camera, 0, 0);
 
@@ -245,6 +301,8 @@ self.onmessage = (e: MessageEvent): void => {
 		! markerIds.includes(e.data.addMarker[0])
 	) {
 		addMarker(e.data.addMarker);
+
+		rebuildPointsData();
 	} else if (
 		'updateMarker' in e.data &&
 		e.data.updateMarker instanceof Array &&
@@ -267,6 +325,8 @@ self.onmessage = (e: MessageEvent): void => {
 
 			placeMarkerInThreeDimensions(marker);
 		}
+
+		rebuildPointsData();
 	} else if (
 		'hasRings' in e.data &&
 		'boolean' === typeof e.data.hasRings
