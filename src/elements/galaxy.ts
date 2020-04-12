@@ -3,9 +3,11 @@ import {
 	customElement,
 	TemplateResult
 } from 'lit-element';
-import { Planet } from './planet';
+import {
+	Planet,
+	Moon,
+} from './planet';
 import { System } from './system';
-import { Moon } from './moon';
 import { Thing } from './thing';
 
 @customElement('nmsh-galaxy')

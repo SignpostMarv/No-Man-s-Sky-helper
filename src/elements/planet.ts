@@ -7,19 +7,18 @@ import {
 import {
 	Marker,
 } from './marker';
-import { Moon } from './moon';
 import { Thing } from './thing';
+import { Satellite } from './satellite';
 
-const surfaces: WeakMap<Planet, HTMLCanvasElement> = new WeakMap();
-const renderers: WeakMap<Planet, Worker> = new WeakMap();
+const surfaces: WeakMap<RenderableBody, HTMLCanvasElement> = new WeakMap();
+const renderers: WeakMap<RenderableBody, Worker> = new WeakMap();
 
 const markerElements = [
 	'nmsh-marker',
 	'nmsh-drop-pod',
 ];
 
-@customElement('nmsh-planet')
-export class Planet extends Thing
+export abstract class RenderableBody extends Thing
 {
 	get canvas(): HTMLCanvasElement
 	{
@@ -29,13 +28,6 @@ export class Planet extends Thing
 	get renderer(): Worker
 	{
 		return renderers.get(this) as Worker;
-	}
-
-	get moons(): Moon[]
-	{
-		return [...this.querySelectorAll('nmsh-moon')].filter(
-			e => e instanceof Moon
-		) as Moon[];
 	}
 
 	constructor()
@@ -61,6 +53,9 @@ export class Planet extends Thing
 
 	@property({type: Boolean})
 	rings = false;
+
+	@property({type: String})
+	color = 'ff0000';
 
 	resize(): void
 	{
@@ -98,19 +93,44 @@ export class Planet extends Thing
 			});
 		});
 
-		([...this.querySelectorAll('nmsh-moon')].filter(
-			e => e instanceof Moon
-		) as Moon[]).forEach((_e, i) => {
-			return this.renderer.postMessage({
-				addMoon: [
-					i,
-				],
-			});
-		});
-
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
 				this.resize();
+			});
+		});
+	}
+
+	update(changedProperties: Map<string, string|number>): void
+	{
+		super.update(changedProperties);
+
+		if (changedProperties.has('color')) {
+			const changeColor = this.color;
+
+			this.renderer.postMessage({changeColor});
+		}
+	}
+}
+
+@customElement('nmsh-planet')
+export class Planet extends RenderableBody
+{
+	get satellites(): Satellite[]
+	{
+		return [...this.querySelectorAll('nmsh-satellite')].filter(
+			e => e instanceof Satellite
+		) as Satellite[];
+	}
+
+	connectedCallback(): void
+	{
+		super.connectedCallback();
+
+		this.satellites.forEach((_e, i) => {
+			return this.renderer.postMessage({
+				addSatellite: [
+					i,
+				],
 			});
 		});
 	}
@@ -125,4 +145,14 @@ export class Planet extends Thing
 			this.renderer.postMessage({hasRings});
 		}
 	}
+}
+
+@customElement('nmsh-moon')
+export class Moon extends RenderableBody
+{
+	@property({type: String})
+	of = '';
+
+	@property({type: String})
+	color = 'ffffff';
 }

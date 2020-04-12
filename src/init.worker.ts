@@ -12,7 +12,7 @@ import {
 } from 'three';
 
 declare type marker = [number, number, number, string];
-declare type moon = [number];
+declare type satellite = [number];
 
 const camera = new PerspectiveCamera(
 	75,
@@ -42,16 +42,16 @@ const rings = new Mesh(
 const speed = {
 	camera: 0.0001,
 	light: -0.00001,
-	moon: -0.001,
+	satellite: -0.001,
 };
 
 const markers: marker[] = [];
 const markerIds: number[] = [];
 const markerMeshes: WeakMap<marker, Object3D> = new WeakMap();
 
-const moons: moon[] = [];
-const moonIds: number[] = [];
-const moonMeshes: WeakMap<moon, Object3D> = new WeakMap();
+const satellites: satellite[] = [];
+const satelliteIds: number[] = [];
+const satelliteMeshes: WeakMap<satellite, Object3D> = new WeakMap();
 
 let renderer: WebGLRenderer|undefined;
 let canvas: OffscreenCanvas|undefined;
@@ -123,10 +123,10 @@ function render(): void {
 		rotateThingAroundPlanet(light, speed.light, diff);
 		rotateThingAroundPlanet(lightOpposite, speed.light, diff);
 
-		moons.forEach(moon => {
+		satellites.forEach(satellite => {
 			rotateThingAroundPlanet(
-				moonMeshes.get(moon) as Object3D,
-				speed.moon,
+				satelliteMeshes.get(satellite) as Object3D,
+				speed.satellite,
 				diff
 			);
 		});
@@ -154,11 +154,11 @@ function addMarker(marker: marker): void
 	scene.add(markerMesh);
 }
 
-function addMoon(moon: moon): void
+function addSatellite(satellite: satellite): void
 {
-	moonIds[moons.push(moon) - 1] = moon[0];
+	satelliteIds[satellites.push(satellite) - 1] = satellite[0];
 
-	const moonMesh = new Mesh(
+	const satelliteMesh = new Mesh(
 		new SphereGeometry(0.125),
 		new MeshPhongMaterial({
 			color:0xffffff,
@@ -166,10 +166,10 @@ function addMoon(moon: moon): void
 		})
 	);
 
-	moonMesh.position.x = 1.75;
+	satelliteMesh.position.x = 1.75;
 
-	planet.add(moonMesh);
-	moonMeshes.set(moon, moonMesh);
+	planet.add(satelliteMesh);
+	satelliteMeshes.set(satellite, satelliteMesh);
 }
 
 self.onmessage = (e: MessageEvent) => {
@@ -249,14 +249,22 @@ self.onmessage = (e: MessageEvent) => {
 			scene.remove(rings);
 		}
 	} else if (
-		'addMoon' in e.data &&
-		e.data.addMoon instanceof Array &&
-		1 === e.data.addMoon.length &&
-		Number.isSafeInteger(e.data.addMoon[0])
+		'addSatellite' in e.data &&
+		e.data.addSatellite instanceof Array &&
+		1 === e.data.addSatellite.length &&
+		Number.isSafeInteger(e.data.addSatellite[0])
 	) {
-		if ( ! moonIds.includes(e.data.addMoon[0])) {
-			addMoon(e.data.addMoon);
+		if ( ! satelliteIds.includes(e.data.addSatellite[0])) {
+			addSatellite(e.data.addSatellite);
 		}
+	} else if (
+		'changeColor' in e.data &&
+		'string' === typeof e.data.changeColor &&
+		/^[0-9a-f]{6}$/.test(e.data.changeColor)
+	) {
+		(
+			planet.material as MeshPhongMaterial
+		).color.setHex(parseInt(e.data.changeColor, 16));
 	} else {
 		console.error(e);
 

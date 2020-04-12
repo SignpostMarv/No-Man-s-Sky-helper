@@ -4,15 +4,17 @@ import {
 	customElement,
 	TemplateResult
 } from 'lit-element';
-import { Planet } from './planet';
-import { Moon } from './moon';
+import {
+	Planet,
+	Moon,
+} from './planet';
 
 @customElement('nmsh-system')
 export class System extends LitElement
 {
 	render(): TemplateResult
 	{
-		return html`${this.planets}`;
+		return html`${this.planets}${this.moons}`;
 	}
 
 	createRenderRoot(): System
@@ -31,13 +33,10 @@ export class System extends LitElement
 
 	get moons(): Moon[]
 	{
-		return this.planets.reduce(
-			(accumulator, planet): Moon[] => {
-				accumulator.push(...planet.moons);
-
-				return accumulator;
-			},
-			[] as Moon[]
-		);
+		return ([...this.querySelectorAll('nmsh-moon')].filter(
+			e => {
+				return e instanceof Moon;
+			}
+		) as Moon[]);
 	}
 }
