@@ -229,15 +229,15 @@ self.onmessage = (e: MessageEvent) => {
 		if ( ! markerIds.includes(e.data.updateMarker[0])) {
 			addMarker(e.data.updateMarker);
 		} else {
-		const marker = markers[
-			markerIds.indexOf(e.data.updateMarker[0])
-		] as marker;
+			const marker = markers[
+				markerIds.indexOf(e.data.updateMarker[0])
+			] as marker;
 
-		marker[1] = e.data.updateMarker[1];
-		marker[2] = e.data.updateMarker[2];
-		marker[3] = e.data.updateMarker[3];
+			marker[1] = e.data.updateMarker[1];
+			marker[2] = e.data.updateMarker[2];
+			marker[3] = e.data.updateMarker[3];
 
-		placeMarkerInThreeDimensions(marker);
+			placeMarkerInThreeDimensions(marker);
 		}
 	} else if (
 		'hasRings' in e.data &&
