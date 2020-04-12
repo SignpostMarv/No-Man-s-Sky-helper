@@ -12,7 +12,6 @@ const rollupPlugins = {
 	minifyHtml: require('rollup-plugin-minify-html-literals').default,
 };
 
-
 gulp.task('rollup--worker', async () => {
     const bundle = await rollup.rollup({
         input: './src/init.worker.ts',
