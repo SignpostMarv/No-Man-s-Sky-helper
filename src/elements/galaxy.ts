@@ -41,4 +41,16 @@ export class Galaxy extends Thing
 			[] as Planet[]
 		);
 	}
+
+	get moons(): Moon[]
+	{
+		return this.systems.reduce(
+			(accumulator, system): Moon[] => {
+				accumulator.push(...system.moons);
+
+				return accumulator;
+			},
+			[] as Moon[]
+		);
+	}
 }
