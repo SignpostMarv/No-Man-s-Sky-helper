@@ -16,10 +16,18 @@ import {
 	BufferGeometry,
 	PointsMaterial,
 	Float32BufferAttribute,
+	DataTexture,
+	RGBAFormat,
 } from 'three';
 import { marker } from 'lit-html/lib/template';
 
-declare type marker = [number, number, number, string];
+declare type marker = [
+	number, // id
+	number, // lat
+	number, // lng
+	string, // title
+	string, // nodeName
+];
 declare type satellite = [number];
 
 const camera = new PerspectiveCamera(
@@ -46,10 +54,25 @@ const rings = new Mesh(
 		flatShading: true,
 	})
 );
-const markerPoints = new Points(new BufferGeometry(), new PointsMaterial({
-	size: 0.01,
-	vertexColors: true,
-}));
+
+const emojiTextures: {[emoji: string]: Uint8ClampedArray|null} = {
+	'🚢': null,
+};
+
+function freshPoints(): Points
+{
+	return new Points(new BufferGeometry(), new PointsMaterial({
+		size: 0.01,
+		vertexColors: true,
+	}));
+}
+
+const points = {
+	markers: freshPoints(),
+	ships: freshPoints(),
+	distressBeacons: freshPoints(),
+	dropPods: freshPoints(),
+};
 
 const speed = {
 	camera: 0.0001,
@@ -179,12 +202,42 @@ function addMarker(marker: marker): void
 }
 
 function rebuildPointsData(): void {
-	const markersToUse = markers.filter(e => undefined !== e);
-	const positions = new Float32Array(markersToUse.length * 3);
-	const colors = new Float32Array(markersToUse.length * 3);
-	const geometry = (markerPoints.geometry as BufferGeometry);
+	const defaultMarkers: marker[] = [];
+	const shipMarkers: marker[] = [];
+	const distressMarkers: marker[] = [];
+	const dropPodMarkers: marker[] = [];
 
-	markersToUse.forEach((marker, i) => {
+	markers.filter(e => undefined !== e).forEach(marker => {
+		switch (marker[4]) {
+			case 'NMSH-CRASHED-FREIGHTER':
+				shipMarkers.push(marker);
+				break;
+			case 'NMSH-DISTRESS-BEACON':
+				distressMarkers.push(marker);
+				break;
+			case 'NMSH-DROP-POD':
+				dropPodMarkers.push(marker);
+				break;
+			default:
+				defaultMarkers.push(marker);
+				break;
+		}
+	});
+
+	([
+		[defaultMarkers, points.markers],
+		[shipMarkers, points.ships],
+		[distressMarkers, points.distressBeacons],
+		[dropPodMarkers, points.dropPods],
+	] as [marker[], Points][]).forEach(e => {
+		const [markerMarkers, markerPoints] = e;
+		const geometry = markerPoints.geometry as BufferGeometry;
+
+
+		const positions = new Float32Array(markerMarkers.length * 3);
+		const colors = new Float32Array(markerMarkers.length * 3);
+
+		markerMarkers.forEach((marker, i) => {
 		const position = markerPositions.get(marker);
 		const color = markerColors.get(marker);
 		const offset = i * 3;
@@ -204,16 +257,23 @@ function rebuildPointsData(): void {
 		colors[offset + 2] = color.b;
 	});
 
-	geometry.setAttribute(
+		geometry.setAttribute(
 		'position',
 		new Float32BufferAttribute(positions, 3)
 	);
-	geometry.setAttribute(
+		geometry.setAttribute(
 		'color',
 		new Float32BufferAttribute(colors, 3)
 	);
 
-	geometry.computeBoundingSphere();
+		geometry.computeBoundingSphere();
+
+		if (markerMarkers.length < 1) {
+			scene.remove(markerPoints);
+		} else {
+			scene.add(markerPoints);
+		}
+	});
 }
 
 function addSatellite(satellite: satellite): void
@@ -252,7 +312,8 @@ rings.receiveShadow = rings.castShadow = true;
 scene.add(light);
 scene.add(lightOpposite);
 scene.add(planet);
-scene.add(markerPoints);
+scene.add(points.markers);
+scene.add(points.ships);
 
 placeCameraInThreeDimensions(camera, 0, 0);
 
@@ -260,15 +321,61 @@ self.onmessage = (e: MessageEvent): void => {
 	if ('offscreen' in e.data) {
 		if ( ! (e.data.offscreen instanceof OffscreenCanvas)) {
 			throw new Error('offscreen canvas was not supplied as expected!');
+		} else if ( ! ('emojis' in e.data)) {
+			throw new Error(
+				'offscreen canvas was not passed along with emoji textures!'
+			);
+		} else if ('object' !== typeof e.data.emojis) {
+			throw new Error('emoji textures were not passed as an object!');
+		} else if (
+			Object.values(
+				e.data.emojis
+			).length !== Object.values(e.data.emojis).filter(
+				e => e instanceof ArrayBuffer
+			).length
+		) {
+			throw new Error(
+				'not all emoji textures were passed as ArrayBuffers!'
+			);
 		}
 
-		console.log('offscreen canvas handed over');
-
-		canvas = e.data.offscreen;
+		canvas = e.data.offscreen as OffscreenCanvas;
 		renderer = new WebGLRenderer({
 			canvas,
 		});
 		renderer.setSize(width, height, false);
+
+		Object.entries(
+			e.data.emojis as {[emoji: string]: ArrayBuffer}
+		).forEach(e => {
+			const [emoji, canvas] = e;
+
+			emojiTextures[emoji] = new Uint8ClampedArray(canvas);
+		});
+
+		const supportedEmojis = Object.keys(emojiTextures);
+
+		([
+			['📍', points.markers.material],
+			['🚢', points.ships.material],
+			['🚨', points.distressBeacons.material],
+			['🕴', points.dropPods.material],
+		] as [string, PointsMaterial][]).forEach(e => {
+			const [emoji, material] = e;
+
+			if (supportedEmojis.includes(emoji)) {
+				const texture = emojiTextures[emoji] as Uint8ClampedArray;
+
+				material.map = new DataTexture(
+					texture,
+					64,
+					64,
+					RGBAFormat
+				);
+				material.map.flipY = true;
+				material.transparent = true;
+			}
+		});
 
 		render();
 	} else if (
@@ -293,11 +400,12 @@ self.onmessage = (e: MessageEvent): void => {
 	} else if (
 		'updateMarker' in e.data &&
 		e.data.updateMarker instanceof Array &&
-		4 === e.data.updateMarker.length &&
+		5 === e.data.updateMarker.length &&
 		Number.isSafeInteger(e.data.updateMarker[0]) &&
 		Number.isFinite(e.data.updateMarker[1]) &&
 		Number.isFinite(e.data.updateMarker[2]) &&
-		'string' === typeof e.data.updateMarker[3]
+		'string' === typeof e.data.updateMarker[3] &&
+		'string' === typeof e.data.updateMarker[4]
 	) {
 		if ( ! markerIds.includes(e.data.updateMarker[0])) {
 			addMarker(e.data.updateMarker);
@@ -312,6 +420,8 @@ self.onmessage = (e: MessageEvent): void => {
 
 			placeMarkerInThreeDimensions(marker);
 		}
+
+		console.log(e.data.updateMarker[4]);
 
 		rebuildPointsData();
 	} else if (

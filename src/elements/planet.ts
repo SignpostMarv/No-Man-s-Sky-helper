@@ -20,6 +20,32 @@ const markerElements = [
 	'nmsh-crashed-freighter',
 ];
 
+const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
+
+[
+	'🚢',
+	'🚨',
+	'🕴',
+	'📍',
+].forEach(emoji => {
+	const canvas = document.createElement('canvas');
+	const ctx = canvas.getContext('2d');
+
+	if ( ! ctx) {
+		throw new Error('could not get 2d context!');
+	}
+
+	canvas.width = canvas.height = 64;
+
+	ctx.font = '48px serif';
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+
+	ctx.fillText(emoji, 32, 32);
+
+	emojiTextures[emoji] = ctx;
+});
+
 export abstract class RenderableBody extends Thing
 {
 	get canvas(): HTMLCanvasElement
@@ -32,7 +58,7 @@ export abstract class RenderableBody extends Thing
 		return renderers.get(this) as Worker;
 	}
 
-	focusOn(thing: Marker, distance = 1.03)
+	focusOn(thing: Marker, distance = 1.03): void
 	{
 		this.cameraAuto = false;
 		this.cameraDistance = distance;
@@ -49,7 +75,21 @@ export abstract class RenderableBody extends Thing
 
 		const offscreen = this.canvas.transferControlToOffscreen();
 
-		this.renderer.postMessage({offscreen}, [offscreen]);
+		const emojis: {[emoji: string]: ArrayBuffer} = {};
+
+		Object.entries(emojiTextures).forEach(e => {
+			const [emoji, ctx] = e;
+
+			emojis[emoji] = ctx.getImageData(0, 0, 64, 64).data.buffer;
+		});
+
+		this.renderer.postMessage({
+			offscreen,
+			emojis,
+		}, [
+			offscreen,
+			...Object.values(emojis)
+		]);
 
 		this.canvas.setAttribute(
 			'style',
@@ -111,6 +151,7 @@ export abstract class RenderableBody extends Thing
 					e.lat,
 					e.lng,
 					e.title,
+					e.nodeName,
 				],
 			});
 		});
