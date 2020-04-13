@@ -13,13 +13,6 @@ import { Satellite } from './satellite';
 const surfaces: WeakMap<RenderableBody, HTMLCanvasElement> = new WeakMap();
 const renderers: WeakMap<RenderableBody, Worker> = new WeakMap();
 
-const markerElements = [
-	'nmsh-marker',
-	'nmsh-drop-pod',
-	'nmsh-distress-beacon',
-	'nmsh-crashed-freighter',
-];
-
 const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
 
 [
@@ -27,6 +20,13 @@ const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
 	'🕴', // exosuit drop pods
 	'🚨', // distress beacons
 	'🚢', // ships
+	'🏫', // monolith
+	'💈', // knowledge stone
+	'⚙', // damaged machinery
+	'⛏', // mineral deposit
+	'🏢', // building
+	'ℹ', // waypoint
+	'🏪', // trade post
 ].forEach(emoji => {
 	const canvas = document.createElement('canvas');
 	const ctx = canvas.getContext('2d');
@@ -140,7 +140,7 @@ export abstract class RenderableBody extends Thing
 	{
 		super.connectedCallback();
 
-		([...this.querySelectorAll(markerElements.join(', '))].filter(
+		([...this.childNodes].filter(
 			e => {
 				return e instanceof Marker;
 			}

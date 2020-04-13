@@ -33,3 +33,38 @@ export class DistressBeacon extends Marker
 export class CrashedFreighter extends Marker
 {
 }
+
+@customElement('nmsh-monolith')
+export class Monolith extends Marker
+{
+}
+
+@customElement('nmsh-knowledge-stone')
+export class KnowledgeStone extends Marker
+{
+}
+
+@customElement('nmsh-damaged-machinery')
+export class DamagedMachinery extends Marker
+{
+}
+
+@customElement('nmsh-mineral-deposit')
+export class MineralDeposit extends Marker
+{
+}
+
+@customElement('nmsh-building')
+export class Building extends Marker
+{
+}
+
+@customElement('nmsh-waypoint')
+export class Waypoint extends Building
+{
+}
+
+@customElement('nmsh-trade-post')
+export class TradePost extends Building
+{
+}

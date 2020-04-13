@@ -55,10 +55,6 @@ const rings = new Mesh(
 	})
 );
 
-const emojiTextures: {[emoji: string]: Uint8ClampedArray|null} = {
-	'🚢': null,
-};
-
 function freshPoints(): Points
 {
 	return new Points(new BufferGeometry(), new PointsMaterial({
@@ -67,11 +63,25 @@ function freshPoints(): Points
 	}));
 }
 
+declare type pointsTuple = [
+	string,
+	Uint8ClampedArray|null,
+	Points,
+	marker[],
+];
+
 const points = {
-	markers: freshPoints(),
-	dropPods: freshPoints(),
-	distressBeacons: freshPoints(),
-	ships: freshPoints(),
+	markers: ['📍', null, freshPoints(), []] as pointsTuple,
+	dropPods: ['🕴', null, freshPoints(), []] as pointsTuple,
+	distressBeacons: ['🚨', null, freshPoints(), []] as pointsTuple,
+	ships: ['🚢', null, freshPoints(), []] as pointsTuple,
+	monolith: ['🏫', null, freshPoints(), []] as pointsTuple,
+	knowledgeStones: ['💈', null, freshPoints(), []] as pointsTuple,
+	damagedMachinery: ['⚙', null, freshPoints(), []] as pointsTuple,
+	mineralDeposits: ['⛏', null, freshPoints(), []] as pointsTuple,
+	building: ['🏢', null, freshPoints(), []] as pointsTuple,
+	waypoint: ['ℹ', null, freshPoints(), []] as pointsTuple,
+	tradePost: ['🏪', null, freshPoints(), []] as pointsTuple,
 };
 
 const speed = {
@@ -202,37 +212,51 @@ function addMarker(marker: marker): void
 }
 
 function rebuildPointsData(): void {
-	const defaultMarkers: marker[] = [];
-	const shipMarkers: marker[] = [];
-	const distressMarkers: marker[] = [];
-	const dropPodMarkers: marker[] = [];
+	Object.values(points).forEach(e => {
+		e[3] = [];
+	});
 
 	markers.filter(e => undefined !== e).forEach(marker => {
-		switch (marker[4]) {
-			case 'NMSH-DROP-POD':
-				dropPodMarkers.push(marker);
+		switch (marker[4].toLowerCase()) {
+			case 'nmsh-drop-pod':
+				points.dropPods[3].push(marker);
 				break;
-			case 'NMSH-DISTRESS-BEACON':
-				distressMarkers.push(marker);
+			case 'nmsh-distress-beacon':
+				points.distressBeacons[3].push(marker);
 				break;
-			case 'NMSH-CRASHED-FREIGHTER':
-				shipMarkers.push(marker);
+			case 'nmsh-crashed-freighter':
+				points.ships[3].push(marker);
+				break;
+			case 'nmsh-monolith':
+				points.monolith[3].push(marker);
+				break;
+			case 'nmsh-knowledge-stone':
+				points.knowledgeStones[3].push(marker);
+				break;
+			case 'nmsh-damaged-machinery':
+				points.damagedMachinery[3].push(marker);
+				break;
+			case 'nmsh-mineral-deposit':
+				points.mineralDeposits[3].push(marker);
+				break;
+			case 'nmsh-building':
+				points.building[3].push(marker);
+				break;
+			case 'nmsh-waypoint':
+				points.waypoint[3].push(marker);
+				break;
+			case 'nmsh-trade-post':
+				points.tradePost[3].push(marker);
 				break;
 			default:
-				defaultMarkers.push(marker);
+				points.markers[3].push(marker);
 				break;
 		}
 	});
 
-	([
-		[defaultMarkers, points.markers],
-		[dropPodMarkers, points.dropPods],
-		[distressMarkers, points.distressBeacons],
-		[shipMarkers, points.ships],
-	] as [marker[], Points][]).forEach(e => {
-		const [markerMarkers, markerPoints] = e;
+	Object.values(points).forEach(e => {
+		const [,, markerPoints, markerMarkers] = e;
 		const geometry = markerPoints.geometry as BufferGeometry;
-
 
 		const positions = new Float32Array(markerMarkers.length * 3);
 		const colors = new Float32Array(markerMarkers.length * 3);
@@ -312,8 +336,6 @@ rings.receiveShadow = rings.castShadow = true;
 scene.add(light);
 scene.add(lightOpposite);
 scene.add(planet);
-scene.add(points.markers);
-scene.add(points.ships);
 
 placeCameraInThreeDimensions(camera, 0, 0);
 
@@ -345,29 +367,15 @@ self.onmessage = (e: MessageEvent): void => {
 		});
 		renderer.setSize(width, height, false);
 
-		Object.entries(
-			e.data.emojis as {[emoji: string]: ArrayBuffer}
-		).forEach(e => {
-			const [emoji, canvas] = e;
+		Object.values(points).forEach(point => {
+			const [emoji] = point;
 
-			emojiTextures[emoji] = new Uint8ClampedArray(canvas);
-		});
+			if (emoji in e.data.emojis) {
+				const material = (point[2].material as PointsMaterial);
 
-		const supportedEmojis = Object.keys(emojiTextures);
-
-		([
-			['📍', points.markers.material],
-			['🚢', points.ships.material],
-			['🚨', points.distressBeacons.material],
-			['🕴', points.dropPods.material],
-		] as [string, PointsMaterial][]).forEach(e => {
-			const [emoji, material] = e;
-
-			if (supportedEmojis.includes(emoji)) {
-				const texture = emojiTextures[emoji] as Uint8ClampedArray;
-
+				point[1] = new Uint8ClampedArray(e.data.emojis[emoji]);
 				material.map = new DataTexture(
-					texture,
+					point[1],
 					64,
 					64,
 					RGBAFormat
