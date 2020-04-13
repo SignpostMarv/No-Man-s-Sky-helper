@@ -421,8 +421,6 @@ self.onmessage = (e: MessageEvent): void => {
 			placeMarkerInThreeDimensions(marker);
 		}
 
-		console.log(e.data.updateMarker[4]);
-
 		rebuildPointsData();
 	} else if (
 		'hasRings' in e.data &&
