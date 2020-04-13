@@ -291,19 +291,6 @@ self.onmessage = (e: MessageEvent): void => {
 			}
 		}
 	} else if (
-		'addMarker' in e.data &&
-		e.data.addMarker instanceof Array &&
-		4 === e.data.addMarker.length &&
-		Number.isSafeInteger(e.data.addMarker[0]) &&
-		Number.isFinite(e.data.addMarker[1]) &&
-		Number.isFinite(e.data.addMarker[2]) &&
-		'string' === typeof e.data.addMarker[3] &&
-		! markerIds.includes(e.data.addMarker[0])
-	) {
-		addMarker(e.data.addMarker);
-
-		rebuildPointsData();
-	} else if (
 		'updateMarker' in e.data &&
 		e.data.updateMarker instanceof Array &&
 		4 === e.data.updateMarker.length &&
