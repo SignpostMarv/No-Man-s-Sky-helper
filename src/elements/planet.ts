@@ -16,6 +16,8 @@ const renderers: WeakMap<RenderableBody, Worker> = new WeakMap();
 const markerElements = [
 	'nmsh-marker',
 	'nmsh-drop-pod',
+	'nmsh-distress-beacon',
+	'nmsh-crashed-freighter',
 ];
 
 export abstract class RenderableBody extends Thing
