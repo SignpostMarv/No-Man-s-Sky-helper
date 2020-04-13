@@ -238,33 +238,33 @@ function rebuildPointsData(): void {
 		const colors = new Float32Array(markerMarkers.length * 3);
 
 		markerMarkers.forEach((marker, i) => {
-		const position = markerPositions.get(marker);
-		const color = markerColors.get(marker);
-		const offset = i * 3;
+			const position = markerPositions.get(marker);
+			const color = markerColors.get(marker);
+			const offset = i * 3;
 
-		if ( ! position) {
-			throw new Error('cannot rebuild points, marker has no position!');
-		} else if ( ! color) {
-			throw new Error('cannot rebuild points, marker has no color!');
-		}
+			if ( ! position) {
+				throw new Error('cannot rebuild points, marker has no position!');
+			} else if ( ! color) {
+				throw new Error('cannot rebuild points, marker has no color!');
+			}
 
-		positions[offset + 0] = position.x;
-		positions[offset + 1] = position.y;
-		positions[offset + 2] = position.z;
+			positions[offset + 0] = position.x;
+			positions[offset + 1] = position.y;
+			positions[offset + 2] = position.z;
 
-		colors[offset + 0] = color.r;
-		colors[offset + 1] = color.g;
-		colors[offset + 2] = color.b;
-	});
+			colors[offset + 0] = color.r;
+			colors[offset + 1] = color.g;
+			colors[offset + 2] = color.b;
+		});
 
 		geometry.setAttribute(
-		'position',
-		new Float32BufferAttribute(positions, 3)
-	);
+			'position',
+			new Float32BufferAttribute(positions, 3)
+		);
 		geometry.setAttribute(
-		'color',
-		new Float32BufferAttribute(colors, 3)
-	);
+			'color',
+			new Float32BufferAttribute(colors, 3)
+		);
 
 		geometry.computeBoundingSphere();
 
