@@ -69,9 +69,9 @@ function freshPoints(): Points
 
 const points = {
 	markers: freshPoints(),
-	ships: freshPoints(),
-	distressBeacons: freshPoints(),
 	dropPods: freshPoints(),
+	distressBeacons: freshPoints(),
+	ships: freshPoints(),
 };
 
 const speed = {
@@ -209,14 +209,14 @@ function rebuildPointsData(): void {
 
 	markers.filter(e => undefined !== e).forEach(marker => {
 		switch (marker[4]) {
-			case 'NMSH-CRASHED-FREIGHTER':
-				shipMarkers.push(marker);
+			case 'NMSH-DROP-POD':
+				dropPodMarkers.push(marker);
 				break;
 			case 'NMSH-DISTRESS-BEACON':
 				distressMarkers.push(marker);
 				break;
-			case 'NMSH-DROP-POD':
-				dropPodMarkers.push(marker);
+			case 'NMSH-CRASHED-FREIGHTER':
+				shipMarkers.push(marker);
 				break;
 			default:
 				defaultMarkers.push(marker);
@@ -226,9 +226,9 @@ function rebuildPointsData(): void {
 
 	([
 		[defaultMarkers, points.markers],
-		[shipMarkers, points.ships],
-		[distressMarkers, points.distressBeacons],
 		[dropPodMarkers, points.dropPods],
+		[distressMarkers, points.distressBeacons],
+		[shipMarkers, points.ships],
 	] as [marker[], Points][]).forEach(e => {
 		const [markerMarkers, markerPoints] = e;
 		const geometry = markerPoints.geometry as BufferGeometry;

@@ -23,10 +23,10 @@ const markerElements = [
 const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
 
 [
-	'🚢',
-	'🚨',
-	'🕴',
-	'📍',
+	'📍', // marker
+	'🕴', // exosuit drop pods
+	'🚨', // distress beacons
+	'🚢', // ships
 ].forEach(emoji => {
 	const canvas = document.createElement('canvas');
 	const ctx = canvas.getContext('2d');
