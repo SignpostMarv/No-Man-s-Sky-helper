@@ -43,6 +43,7 @@ const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
 	ctx.font = '48px serif';
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
+	ctx.fillStyle = '#fff';
 
 	ctx.fillText(emoji, 32, 32);
 
