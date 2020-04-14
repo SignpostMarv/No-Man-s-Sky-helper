@@ -186,50 +186,11 @@ function rebuildPointsData(): void {
 	});
 
 	markers.filter(e => undefined !== e).forEach(marker => {
-		switch (marker[4].toLowerCase()) {
-			case 'nmsh-drop-pod':
-				points.dropPods[2].push(marker);
-				break;
-			case 'nmsh-distress-beacon':
-				points.distressBeacons[2].push(marker);
-				break;
-			case 'nmsh-crashed-freighter':
-				points.ships[2].push(marker);
-				break;
-			case 'nmsh-monolith':
-				points.monolith[2].push(marker);
-				break;
-			case 'nmsh-knowledge-stone':
-				points.knowledgeStones[2].push(marker);
-				break;
-			case 'nmsh-damaged-machinery':
-				points.damagedMachinery[2].push(marker);
-				break;
-			case 'nmsh-mineral-deposit':
-				points.mineralDeposits[2].push(marker);
-				break;
-			case 'nmsh-building':
-				points.building[2].push(marker);
-				break;
-			case 'nmsh-waypoint':
-				points.waypoint[2].push(marker);
-				break;
-			case 'nmsh-trade-post':
-				points.tradePost[2].push(marker);
-				break;
-			case 'nmsh-minor-settlement':
-				points.minorSettlements[2].push(marker);
-				break;
-			case 'nmsh-transmission-towers':
-				points.transmissionTowers[2].push(marker);
-				break;
-			case 'nmsh-ancient-ruin':
-				points.ancientRuins[2].push(marker);
-				break;
-			default:
-				points.markers[2].push(marker);
-				break;
-		}
+		(
+			Object.values(points).find(
+				e => e[3].includes(marker[4].toLowerCase())
+			) || points.markers
+		)[2].push(marker);
 	});
 
 	Object.values(points).forEach(e => {
