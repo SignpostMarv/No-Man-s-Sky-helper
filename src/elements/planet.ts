@@ -79,7 +79,7 @@ export abstract class RenderableBody extends Thing
 	cameraLng = 0;
 
 	@property({type: Number, attribute: 'camera-distance'})
-	cameraDistance = 4;
+	cameraDistance = 100000;
 
 	resize(): void
 	{

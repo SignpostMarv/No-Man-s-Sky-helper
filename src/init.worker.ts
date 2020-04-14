@@ -28,29 +28,34 @@ import {
 	satellite,
 } from './defs';
 
-const camera = new PerspectiveCamera(
-	75,
-	2,
-	0.001,
-	10,
-);
-
 const scene = new Scene();
 const light = new PointLight(0xffffff, 1);
 const lightOpposite = new DirectionalLight(0xffffff, 0.1);
+const planetRadius = 6_371_000 / 48; // ref https://www.reddit.com/r/NoMansSkyTheGame/comments/9lbcpx/the_size_of_planets_in_nms_more_details_in/e76k6z4/
 const planet = new Mesh(
-	new SphereGeometry(1, 32, 32),
+	new SphereGeometry(
+		planetRadius,
+		180,
+		360
+	),
 	new MeshPhongMaterial({
 		color: 0xff0000,
 		flatShading: true,
 	})
 );
 const rings = new Mesh(
-	new TorusGeometry(1.375, 0.125, 2, 32),
+	new TorusGeometry(planetRadius * 1.375, planetRadius * 0.125, 2, 360),
 	new MeshPhongMaterial({
 		color: 0xffffff,
 		flatShading: true,
 	})
+);
+
+const camera = new PerspectiveCamera(
+	75,
+	2,
+	0.001,
+	planetRadius * 4
 );
 
 const speed = {
@@ -75,7 +80,7 @@ let cancelRender = 0;
 let now = performance.now();
 let cameraAuto = true;
 let cameraLat = 0, cameraLng = 0;
-let cameraDistance = 4;
+let cameraDistance = planetRadius;
 
 function rotateThingAroundPlanet(
 	thing: Object3D,
@@ -101,11 +106,16 @@ function movePositionInThreeDimensions(
 	position: Vector3,
 	lat: number,
 	lng: number,
-	distance: number
+	distanceAboveSurface: number
 ): void {
 	const pi = Math.PI / 180;
 	const phi = (90 - lat) * pi;
 	const theta = (180 + lng) * pi;
+
+	const distance = (
+		planetRadius +
+		distanceAboveSurface
+	);
 
 	position.x = distance * Math.sin(phi) * Math.cos(theta);
 	position.y = distance * Math.sin(phi) * Math.sin(theta);
@@ -129,7 +139,7 @@ function placeMarkerInThreeDimensions(marker: marker): void
 		throw new Error('marker does not have a position!');
 	}
 
-	movePositionInThreeDimensions(position, marker[1], marker[2], 1.02);
+	movePositionInThreeDimensions(position, marker[1], marker[2], 0.02);
 }
 
 function placeCameraInThreeDimensions(
@@ -260,8 +270,15 @@ function addSatellite(satellite: satellite): void
 camera.aspect = width / height;
 camera.updateProjectionMatrix();
 
-light.position.set(-1, 2, 4);
-lightOpposite.position.set(1, -2, -4);
+lightOpposite.position.set(
+	1,
+	-2,
+	(
+		0 -
+		planetRadius * 4
+	)
+);
+light.position.set(-1, 2, Math.abs(lightOpposite.position.z));
 
 light.position.multiplyScalar(10);
 
@@ -303,6 +320,7 @@ self.onmessage = (e: MessageEvent): void => {
 		canvas = e.data.offscreen as OffscreenCanvas;
 		renderer = new WebGLRenderer({
 			canvas,
+			logarithmicDepthBuffer: true,
 		});
 		renderer.setSize(width, height, false);
 
@@ -401,7 +419,7 @@ self.onmessage = (e: MessageEvent): void => {
 		cameraAuto = e.data.cameraAuto;
 
 		if (e.data.cameraAuto) {
-			placeCameraInThreeDimensions(camera, 0, 0, 4);
+			placeCameraInThreeDimensions(camera, 0, 0);
 		} else {
 			placeCameraInThreeDimensions(camera, cameraLat, cameraLng);
 		}
@@ -419,7 +437,9 @@ self.onmessage = (e: MessageEvent): void => {
 		'cameraDistance' in e.data &&
 		Number.isFinite(e.data.cameraDistance)
 	) {
-		cameraDistance = e.data.cameraDistance;
+		cameraDistance = (
+			e.data.cameraDistance
+		);
 
 		if ( ! cameraAuto) {
 			placeCameraInThreeDimensions(camera, cameraLat, cameraLng);

@@ -11,7 +11,7 @@ import {
 function freshPoints(): Points
 {
 	return new Points(new BufferGeometry(), new PointsMaterial({
-		size: 0.01,
+		size: 64,
 		vertexColors: true,
 	}));
 }
