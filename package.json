@@ -34,7 +34,6 @@
     "postcss-nested": "^4.2.1",
     "postcss-system-monospace": "^2.1.0",
     "rollup": "^2.4.0",
-    "rollup-plugin-cleanup": "^3.1.1",
     "rollup-plugin-minify-html-literals": "^1.2.3",
     "three": "^0.115.0",
     "typescript": "^3.8.3",
