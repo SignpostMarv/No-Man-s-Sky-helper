@@ -68,3 +68,18 @@ export class Waypoint extends Building
 export class TradePost extends Building
 {
 }
+
+@customElement('nmsh-minor-settlement')
+export class MinorSettlement extends Building
+{
+}
+
+@customElement('nmsh-transmission-tower')
+export class TransmissionTower extends Building
+{
+}
+
+@customElement('nmsh-ancient-ruin')
+export class AncientRuin extends Building
+{
+}

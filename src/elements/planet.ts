@@ -27,6 +27,9 @@ const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
 	'🏢', // building
 	'ℹ', // waypoint
 	'🏪', // trade post
+	'🏘', // minor settlement
+	'🗼', // transmission tower
+	'🏛', // ancient ruin
 ].forEach(emoji => {
 	const canvas = document.createElement('canvas');
 	const ctx = canvas.getContext('2d');

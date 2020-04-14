@@ -82,6 +82,9 @@ const points = {
 	building: ['🏢', null, freshPoints(), []] as pointsTuple,
 	waypoint: ['ℹ', null, freshPoints(), []] as pointsTuple,
 	tradePost: ['🏪', null, freshPoints(), []] as pointsTuple,
+	minorSettlements: ['🏘', null, freshPoints(), []] as pointsTuple,
+	transmissionTowers: ['🗼', null, freshPoints(), []] as pointsTuple,
+	ancientRuins: ['🏛', null, freshPoints(), []] as pointsTuple,
 };
 
 const speed = {
@@ -247,6 +250,15 @@ function rebuildPointsData(): void {
 				break;
 			case 'nmsh-trade-post':
 				points.tradePost[3].push(marker);
+				break;
+			case 'nmsh-minor-settlement':
+				points.minorSettlements[3].push(marker);
+				break;
+			case 'nmsh-transmission-towers':
+				points.transmissionTowers[3].push(marker);
+				break;
+			case 'nmsh-ancient-ruin':
+				points.ancientRuins[3].push(marker);
 				break;
 			default:
 				points.markers[3].push(marker);
