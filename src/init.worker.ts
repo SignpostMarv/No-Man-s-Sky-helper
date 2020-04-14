@@ -65,26 +65,25 @@ function freshPoints(): Points
 
 declare type pointsTuple = [
 	string,
-	Uint8ClampedArray|null,
 	Points,
 	marker[],
 ];
 
 const points = {
-	markers: ['📍', null, freshPoints(), []] as pointsTuple,
-	dropPods: ['🕴', null, freshPoints(), []] as pointsTuple,
-	distressBeacons: ['🚨', null, freshPoints(), []] as pointsTuple,
-	ships: ['🚢', null, freshPoints(), []] as pointsTuple,
-	monolith: ['🏫', null, freshPoints(), []] as pointsTuple,
-	knowledgeStones: ['🏺', null, freshPoints(), []] as pointsTuple,
-	damagedMachinery: ['⚙', null, freshPoints(), []] as pointsTuple,
-	mineralDeposits: ['⛏', null, freshPoints(), []] as pointsTuple,
-	building: ['🏢', null, freshPoints(), []] as pointsTuple,
-	waypoint: ['ℹ', null, freshPoints(), []] as pointsTuple,
-	tradePost: ['🏪', null, freshPoints(), []] as pointsTuple,
-	minorSettlements: ['🏘', null, freshPoints(), []] as pointsTuple,
-	transmissionTowers: ['🗼', null, freshPoints(), []] as pointsTuple,
-	ancientRuins: ['🏛', null, freshPoints(), []] as pointsTuple,
+	markers: ['📍', freshPoints(), []] as pointsTuple,
+	dropPods: ['🕴', freshPoints(), []] as pointsTuple,
+	distressBeacons: ['🚨', freshPoints(), []] as pointsTuple,
+	ships: ['🚢', freshPoints(), []] as pointsTuple,
+	monolith: ['🏫', freshPoints(), []] as pointsTuple,
+	knowledgeStones: ['🏺', freshPoints(), []] as pointsTuple,
+	damagedMachinery: ['⚙', freshPoints(), []] as pointsTuple,
+	mineralDeposits: ['⛏', freshPoints(), []] as pointsTuple,
+	building: ['🏢', freshPoints(), []] as pointsTuple,
+	waypoint: ['ℹ', freshPoints(), []] as pointsTuple,
+	tradePost: ['🏪', freshPoints(), []] as pointsTuple,
+	minorSettlements: ['🏘', freshPoints(), []] as pointsTuple,
+	transmissionTowers: ['🗼', freshPoints(), []] as pointsTuple,
+	ancientRuins: ['🏛', freshPoints(), []] as pointsTuple,
 };
 
 const speed = {
@@ -216,58 +215,58 @@ function addMarker(marker: marker): void
 
 function rebuildPointsData(): void {
 	Object.values(points).forEach(e => {
-		e[3] = [];
+		e[2] = [];
 	});
 
 	markers.filter(e => undefined !== e).forEach(marker => {
 		switch (marker[4].toLowerCase()) {
 			case 'nmsh-drop-pod':
-				points.dropPods[3].push(marker);
+				points.dropPods[2].push(marker);
 				break;
 			case 'nmsh-distress-beacon':
-				points.distressBeacons[3].push(marker);
+				points.distressBeacons[2].push(marker);
 				break;
 			case 'nmsh-crashed-freighter':
-				points.ships[3].push(marker);
+				points.ships[2].push(marker);
 				break;
 			case 'nmsh-monolith':
-				points.monolith[3].push(marker);
+				points.monolith[2].push(marker);
 				break;
 			case 'nmsh-knowledge-stone':
-				points.knowledgeStones[3].push(marker);
+				points.knowledgeStones[2].push(marker);
 				break;
 			case 'nmsh-damaged-machinery':
-				points.damagedMachinery[3].push(marker);
+				points.damagedMachinery[2].push(marker);
 				break;
 			case 'nmsh-mineral-deposit':
-				points.mineralDeposits[3].push(marker);
+				points.mineralDeposits[2].push(marker);
 				break;
 			case 'nmsh-building':
-				points.building[3].push(marker);
+				points.building[2].push(marker);
 				break;
 			case 'nmsh-waypoint':
-				points.waypoint[3].push(marker);
+				points.waypoint[2].push(marker);
 				break;
 			case 'nmsh-trade-post':
-				points.tradePost[3].push(marker);
+				points.tradePost[2].push(marker);
 				break;
 			case 'nmsh-minor-settlement':
-				points.minorSettlements[3].push(marker);
+				points.minorSettlements[2].push(marker);
 				break;
 			case 'nmsh-transmission-towers':
-				points.transmissionTowers[3].push(marker);
+				points.transmissionTowers[2].push(marker);
 				break;
 			case 'nmsh-ancient-ruin':
-				points.ancientRuins[3].push(marker);
+				points.ancientRuins[2].push(marker);
 				break;
 			default:
-				points.markers[3].push(marker);
+				points.markers[2].push(marker);
 				break;
 		}
 	});
 
 	Object.values(points).forEach(e => {
-		const [,, markerPoints, markerMarkers] = e;
+		const [, markerPoints, markerMarkers] = e;
 		const geometry = markerPoints.geometry as BufferGeometry;
 
 		const positions = new Float32Array(markerMarkers.length * 3);
@@ -383,11 +382,10 @@ self.onmessage = (e: MessageEvent): void => {
 			const [emoji] = point;
 
 			if (emoji in e.data.emojis) {
-				const material = (point[2].material as PointsMaterial);
+				const material = (point[1].material as PointsMaterial);
 
-				point[1] = new Uint8ClampedArray(e.data.emojis[emoji]);
 				material.map = new DataTexture(
-					point[1],
+					new Uint8ClampedArray(e.data.emojis[emoji]),
 					64,
 					64,
 					RGBAFormat
