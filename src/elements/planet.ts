@@ -21,7 +21,7 @@ const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
 	'🚨', // distress beacons
 	'🚢', // ships
 	'🏫', // monolith
-	'💈', // knowledge stone
+	'🏺', // knowledge stone
 	'⚙', // damaged machinery
 	'⛏', // mineral deposit
 	'🏢', // building

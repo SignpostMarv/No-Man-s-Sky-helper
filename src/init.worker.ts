@@ -76,7 +76,7 @@ const points = {
 	distressBeacons: ['🚨', null, freshPoints(), []] as pointsTuple,
 	ships: ['🚢', null, freshPoints(), []] as pointsTuple,
 	monolith: ['🏫', null, freshPoints(), []] as pointsTuple,
-	knowledgeStones: ['💈', null, freshPoints(), []] as pointsTuple,
+	knowledgeStones: ['🏺', null, freshPoints(), []] as pointsTuple,
 	damagedMachinery: ['⚙', null, freshPoints(), []] as pointsTuple,
 	mineralDeposits: ['⛏', null, freshPoints(), []] as pointsTuple,
 	building: ['🏢', null, freshPoints(), []] as pointsTuple,
