@@ -3,6 +3,7 @@ import {
 	property,
 } from 'lit-element';
 import { Thing } from './thing';
+import { Planet } from './planet';
 
 @customElement('nmsh-marker')
 export class Marker extends Thing
@@ -15,6 +16,15 @@ export class Marker extends Thing
 
 	@property({type: String})
 	title = 'marker';
+
+	focusHere(distance: 0.01): void
+	{
+		if ( ! (this.parentNode instanceof Planet)) {
+			throw new Error('Cannot focus on a marker when not in a planet!');
+		}
+
+		this.parentNode.focusOn(this, distance);
+	}
 }
 
 @customElement('nmsh-drop-pod')
