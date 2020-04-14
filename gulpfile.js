@@ -11,6 +11,7 @@ const rollupPlugins = {
 	jsonResolve: require('@rollup/plugin-json'),
 	typescript: require('@rollup/plugin-typescript'),
 	minifyHtml: require('rollup-plugin-minify-html-literals').default,
+	terser: require('rollup-plugin-terser').terser,
 };
 
 const postcssPlugins = {
@@ -32,6 +33,7 @@ gulp.task('rollup--worker', async () => {
                 outDir: './dist/',
             }),
 			rollupPlugins.minifyHtml(),
+			rollupPlugins.terser(),
         ],
     });
 
@@ -50,7 +52,8 @@ gulp.task('rollup--init', async () => {
             rollupPlugins.typescript({
                 tsconfig: './tsconfig.json',
                 outDir: './dist/',
-            }),
+			}),
+			rollupPlugins.terser(),
         ],
     });
 
