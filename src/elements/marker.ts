@@ -20,8 +20,6 @@ export class Marker extends Thing
 @customElement('nmsh-drop-pod')
 export class DropPod extends Marker
 {
-	@property({type: String})
-	needs = '';
 }
 
 @customElement('nmsh-distress-beacon')
