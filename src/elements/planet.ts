@@ -9,46 +9,10 @@ import {
 } from './marker';
 import { Thing } from './thing';
 import { Satellite } from './satellite';
+import { emojiTextureBuffers } from '../emoji-textures';
 
 const surfaces: WeakMap<RenderableBody, HTMLCanvasElement> = new WeakMap();
 const renderers: WeakMap<RenderableBody, Worker> = new WeakMap();
-
-const emojiTextures: {[emoji: string]: CanvasRenderingContext2D} = {};
-
-[
-	'📍', // marker
-	'🕴', // exosuit drop pods
-	'🚨', // distress beacons
-	'🚢', // ships
-	'🏫', // monolith
-	'🏺', // knowledge stone
-	'⚙', // damaged machinery
-	'⛏', // mineral deposit
-	'🏢', // building
-	'ℹ', // waypoint
-	'🏪', // trade post
-	'🏘', // minor settlement
-	'🗼', // transmission tower
-	'🏛', // ancient ruin
-].forEach(emoji => {
-	const canvas = document.createElement('canvas');
-	const ctx = canvas.getContext('2d');
-
-	if ( ! ctx) {
-		throw new Error('could not get 2d context!');
-	}
-
-	canvas.width = canvas.height = 64;
-
-	ctx.font = '48px serif';
-	ctx.textAlign = 'center';
-	ctx.textBaseline = 'middle';
-	ctx.fillStyle = '#fff';
-
-	ctx.fillText(emoji, 32, 32);
-
-	emojiTextures[emoji] = ctx;
-});
 
 export abstract class RenderableBody extends Thing
 {
@@ -79,13 +43,7 @@ export abstract class RenderableBody extends Thing
 
 		const offscreen = this.canvas.transferControlToOffscreen();
 
-		const emojis: {[emoji: string]: ArrayBuffer} = {};
-
-		Object.entries(emojiTextures).forEach(e => {
-			const [emoji, ctx] = e;
-
-			emojis[emoji] = ctx.getImageData(0, 0, 64, 64).data.buffer;
-		});
+		const emojis = emojiTextureBuffers();
 
 		this.renderer.postMessage({
 			offscreen,

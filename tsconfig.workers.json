@@ -28,6 +28,7 @@
 		"target": "ESNext"
 	},
 	"include": [
+		"./src/points.ts",
 		"./src/**/*.worker.ts"
 	]
 }

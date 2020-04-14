@@ -12,23 +12,21 @@ import {
 	Camera,
 	Vector3,
 	Color,
-	Points,
 	BufferGeometry,
 	PointsMaterial,
 	Float32BufferAttribute,
 	DataTexture,
 	RGBAFormat,
 } from 'three';
-import { marker } from 'lit-html/lib/template';
 
-declare type marker = [
-	number, // id
-	number, // lat
-	number, // lng
-	string, // title
-	string, // nodeName
-];
-declare type satellite = [number];
+import {
+	points,
+} from './points.js';
+
+import {
+	marker,
+	satellite,
+} from './defs';
 
 const camera = new PerspectiveCamera(
 	75,
@@ -54,37 +52,6 @@ const rings = new Mesh(
 		flatShading: true,
 	})
 );
-
-function freshPoints(): Points
-{
-	return new Points(new BufferGeometry(), new PointsMaterial({
-		size: 0.01,
-		vertexColors: true,
-	}));
-}
-
-declare type pointsTuple = [
-	string,
-	Points,
-	marker[],
-];
-
-const points = {
-	markers: ['📍', freshPoints(), []] as pointsTuple,
-	dropPods: ['🕴', freshPoints(), []] as pointsTuple,
-	distressBeacons: ['🚨', freshPoints(), []] as pointsTuple,
-	ships: ['🚢', freshPoints(), []] as pointsTuple,
-	monolith: ['🏫', freshPoints(), []] as pointsTuple,
-	knowledgeStones: ['🏺', freshPoints(), []] as pointsTuple,
-	damagedMachinery: ['⚙', freshPoints(), []] as pointsTuple,
-	mineralDeposits: ['⛏', freshPoints(), []] as pointsTuple,
-	building: ['🏢', freshPoints(), []] as pointsTuple,
-	waypoint: ['ℹ', freshPoints(), []] as pointsTuple,
-	tradePost: ['🏪', freshPoints(), []] as pointsTuple,
-	minorSettlements: ['🏘', freshPoints(), []] as pointsTuple,
-	transmissionTowers: ['🗼', freshPoints(), []] as pointsTuple,
-	ancientRuins: ['🏛', freshPoints(), []] as pointsTuple,
-};
 
 const speed = {
 	camera: 0.0001,
