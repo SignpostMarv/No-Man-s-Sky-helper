@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>No Man's Sky helper</title>
+	<meta content="width=device-width,initial-scale=1" name="viewport">
+	<link  href="../index.css" rel="stylesheet">
+</head>
+<body>
+	<nmsh-galaxy>
+		<nmsh-system
+			title="Example System"
+		>
+			<!--
+				camera-auto sets the camera to spin around the planet
+				camera-lat and camera-lang accept latitude & longitude
+				camera-distance is the distance above the surface of the planet
+				galactic-coordinates describes the portal address of a planet
+			-->
+			<nmsh-planet
+				title="Foo"
+				camera-auto
+				galactic-coordinates="foo:0123:4567:89ab:cdef"
+			>
+				<nmsh-satellite
+					count="2"
+				>
+				Currently only renders 1 moon.
+				</nmsh-satellite>
+				<nmsh-marker
+					title="Example"
+					lat="-1.23"
+					lng="45.67"
+				>
+				Markers can have descriptions, but they're not rendered (yet).
+				</nmsh-marker>
+				<nmsh-knowledge-stone
+					lat="1.23"
+					lng="45.67"
+				>
+				Markers do not *need* a title, but can be given one.
+				</nmsh-knowledge-stone>
+				<!--
+					Refer to https://github.com/SignpostMarv/No-Mans-Sky-helper/blob/master/src/points.ts
+					for a full list of markers, tag names, and icons used.
+				-->
+			</nmsh-planet>
+		</nmsh-system>
+	</nmsh-galaxy>
+	<script type="module" async src="../init.js"></script>
+</body>
+</html>
