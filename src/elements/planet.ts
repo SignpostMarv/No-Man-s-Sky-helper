@@ -14,6 +14,8 @@ import { emojiTextureBuffers } from '../emoji-textures';
 const surfaces: WeakMap<RenderableBody, HTMLCanvasElement> = new WeakMap();
 const renderers: WeakMap<RenderableBody, Worker> = new WeakMap();
 
+const GalacticCoordinatesRegex = /^[A-Za-z]+(?::[A-Fa-f0-9]{4}){4}$/;
+
 export abstract class RenderableBody extends Thing
 {
 	get canvas(): HTMLCanvasElement
@@ -24,6 +26,18 @@ export abstract class RenderableBody extends Thing
 	get renderer(): Worker
 	{
 		return renderers.get(this) as Worker;
+	}
+
+	get galacticCoordinatesBigInt(): BigInt
+	{
+		if ( ! GalacticCoordinatesRegex.test(this.galacticCoordinates)) {
+			throw new Error('galacticCoordinates are invalid!');
+		}
+
+		return BigInt(
+			'0x' +
+			this.galacticCoordinates.substring(5).replace(/:/g, '')
+		);
 	}
 
 	focusOn(thing: Marker, distance = 0.01): void
@@ -80,6 +94,9 @@ export abstract class RenderableBody extends Thing
 
 	@property({type: Number, attribute: 'camera-distance'})
 	cameraDistance = 100000;
+
+	@property({type: String, attribute: 'galactic-coordinates'})
+	galacticCoordinates = 'OISI:0000:0000:0000:0000';
 
 	resize(): void
 	{
@@ -164,6 +181,16 @@ export abstract class RenderableBody extends Thing
 			const {cameraDistance} = this;
 
 			this.renderer.postMessage({cameraDistance});
+		}
+
+		if (changedProperties.has('galacticCoordinates')) {
+			if (
+				! GalacticCoordinatesRegex.test(
+					this.galacticCoordinates
+				)
+			) {
+				throw new Error('Galactic coordinates are invalid!');
+			}
 		}
 	}
 }
