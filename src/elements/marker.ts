@@ -37,8 +37,17 @@ export class DistressBeacon extends Marker
 {
 }
 
+abstract class CrashedShip extends Marker
+{
+}
+
 @customElement('nmsh-crashed-freighter')
-export class CrashedFreighter extends Marker
+export class CrashedFreighter extends CrashedShip
+{
+}
+
+@customElement('nmsh-damaged-starship')
+export class DamagedStarship extends CrashedShip
 {
 }
 
@@ -89,5 +98,35 @@ export class TransmissionTower extends Building
 
 @customElement('nmsh-ancient-ruin')
 export class AncientRuin extends Building
+{
+}
+
+@customElement('nmsh-observatory')
+export class Observatory extends Building
+{
+}
+
+@customElement('nmsh-portal')
+export class Portal extends Marker
+{
+}
+
+@customElement('nmsh-cargo-drop')
+export class CargoDrop extends Marker
+{
+}
+
+@customElement('nmsh-manufacturing-facility')
+export class ManufacturingFacility extends Building
+{
+}
+
+@customElement('nmsh-shelter')
+export class Shelter extends Building
+{
+}
+
+@customElement('nmsh-comms-tower')
+export class HolographicCommsTower extends Building
 {
 }
