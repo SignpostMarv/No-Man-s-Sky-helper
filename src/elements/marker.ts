@@ -3,7 +3,7 @@ import {
 	property,
 } from 'lit-element';
 import { Thing } from './thing';
-import { Planet } from './planet';
+import { RenderableBody } from './planet';
 
 @customElement('nmsh-marker')
 export class Marker extends Thing
@@ -19,7 +19,7 @@ export class Marker extends Thing
 
 	focusHere(distance: 0.01): void
 	{
-		if ( ! (this.parentNode instanceof Planet)) {
+		if ( ! (this.parentNode instanceof RenderableBody)) {
 			throw new Error('Cannot focus on a marker when not in a planet!');
 		}
 
