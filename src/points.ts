@@ -8,6 +8,13 @@ import {
 	marker,
 } from './defs';
 
+declare type pointsTuple = [
+	string,
+	Points,
+	marker[],
+	string[],
+];
+
 function freshPoints(): Points
 {
 	return new Points(new BufferGeometry(), new PointsMaterial({
@@ -16,122 +23,139 @@ function freshPoints(): Points
 	}));
 }
 
-declare type pointsTuple = [
-	string,
-	Points,
-	marker[],
-	string[],
-];
+function freshTuple(emoji: string, elements: string[]): pointsTuple
+{
+	return [
+		emoji,
+		freshPoints(),
+		[],
+		elements,
+	];
+}
 
 export const points = {
-	markers: [
+	markers: freshTuple(
 		'📍',
-		freshPoints(),
-		[],
-		[], // empty on purpose
-	] as pointsTuple,
-	dropPods: [
+		[] // empty on purpose
+	),
+	dropPods: freshTuple(
 		'🕴',
-		freshPoints(),
-		[],
 		[
 			'nmsh-drop-pod',
-		],
-	] as pointsTuple,
-	distressBeacons: [
+		]
+	),
+	distressBeacons: freshTuple(
 		'🚨',
-		freshPoints(),
-		[],
 		[
 			'nmsh-distress-beacon',
-		],
-	] as pointsTuple,
-	ships: [
+		]
+	),
+	ships: freshTuple(
 		'🚢',
-		freshPoints(),
-		[],
 		[
 			'nmsh-crashed-freighter',
-		],
-	] as pointsTuple,
-	monolith: [
+		]
+	),
+	monolith: freshTuple(
 		'🏫',
-		freshPoints(),
-		[],
 		[
 			'nmsh-monolith',
-		],
-	] as pointsTuple,
-	knowledgeStones: [
+		]
+	),
+	knowledgeStones: freshTuple(
 		'🏺',
-		freshPoints(),
-		[],
 		[
 			'nmsh-knowledge-stone',
-		],
-	] as pointsTuple,
-	damagedMachinery: [
+		]
+	),
+	damagedMachinery: freshTuple(
 		'⚙',
-		freshPoints(),
-		[],
 		[
 			'nmsh-damaged-machinery',
-		],
-	] as pointsTuple,
-	mineralDeposits: [
+		]
+	),
+	mineralDeposits: freshTuple(
 		'⛏',
-		freshPoints(),
-		[],
 		[
 			'nmsh-mineral-deposit',
-		],
-	] as pointsTuple,
-	building: [
+		]
+	),
+	building: freshTuple(
 		'🏢',
-		freshPoints(),
-		[],
 		[
 			'nmsh-building',
-		],
-	] as pointsTuple,
-	waypoint: [
+		]
+	),
+	waypoint: freshTuple(
 		'ℹ',
-		freshPoints(),
-		[],
 		[
 			'nmsh-waypoint',
-		],
-	] as pointsTuple,
-	tradePost: [
+		]
+	),
+	tradePost: freshTuple(
 		'🏪',
-		freshPoints(),
-		[],
 		[
 			'nmsh-trade-post',
-		],
-	] as pointsTuple,
-	minorSettlements: [
+		]
+	),
+	minorSettlements: freshTuple(
 		'🏘',
-		freshPoints(),
-		[],
 		[
 			'nmsh-minor-settlement',
-		],
-	] as pointsTuple,
-	transmissionTowers: [
+		]
+	),
+	transmissionTowers: freshTuple(
 		'🗼',
-		freshPoints(),
-		[],
 		[
 			'nmsh-transmission-tower',
-		],
-	] as pointsTuple,
-	ancientRuins: [
+		]
+	),
+	ancientRuins: freshTuple(
 		'🏛',
-		freshPoints(),
-		[],
 		[
 			'nmsh-ancient-ruin',
+		]
+	),
+	observatories: freshTuple(
+		'🔭',
+		[
+			'nmsh-observatory',
+		]
+	),
+	portals: freshTuple(
+		'🚪',
+		[
+			'nmsh-portal',
 		],
-	] as pointsTuple,
+	),
+	cargoDrop: freshTuple(
+		'📦',
+		[
+			'nmsh-cargo-drop',
+		]
+	),
+	damagedStarship: freshTuple(
+		'🛩',
+		[
+			'nmsh-damaged-starship',
+		]
+	),
+	manufacturingFacility: freshTuple(
+		'🏭',
+		[
+			'nmsh-manufacturing-facility',
+		]
+	),
+	shelters: freshTuple(
+		'⛺',
+		[
+			'nmsh-shelter',
+		]
+	),
+	holographicCommsTower: freshTuple(
+		'📻',
+		[
+			'nmsh-comms-tower',
+		]
+	),
 };
