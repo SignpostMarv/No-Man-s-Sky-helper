@@ -130,3 +130,8 @@ export class Shelter extends Building
 export class HolographicCommsTower extends Building
 {
 }
+
+@customElement('nmsh-ancient-data-structure')
+export class AncientDataStructure extends Marker
+{
+}

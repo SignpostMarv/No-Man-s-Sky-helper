@@ -47,6 +47,7 @@ uses:
 | 🏭 | Manufacturing Facility | `nmsh-manufacturing-facility`|
 | ⛺ | Shelters | `nmsh-shelter` |
 | 📻 | Holographic Comms Tower | `nmsh-comms-tower` |
+| 💽 | Ancient Data Structure | `nmsh-ancient-data-structure` |
 
 
 ## Demo

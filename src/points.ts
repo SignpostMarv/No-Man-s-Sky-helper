@@ -158,4 +158,10 @@ export const points = {
 			'nmsh-comms-tower',
 		]
 	),
+	ancientDataStructure: freshTuple(
+		'💽',
+		[
+			'nmsh-ancient-data-structure',
+		]
+	),
 };
